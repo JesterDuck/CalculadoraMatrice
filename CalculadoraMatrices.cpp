@@ -5,8 +5,12 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include <WindowsNumerics.h>
 
+
+using namespace DirectX;
 using namespace std;
+using namespace Windows::Foundation::Numerics;
 
 // Función para sumar dos matrices
 vector<vector<double>> sumarMatrices(const vector<vector<double>>& mat1, const vector<vector<double>>& mat2) {
@@ -61,7 +65,7 @@ vector<vector<double>> multiplicarMatrices(const vector<vector<double>>& mat1, c
     // Crear una matriz resultado inicializada con ceros
     vector<vector<double>> result(fil1, vector<double>(col2, 0));
 
-    // Algoritmo estándar de multiplicación de matrices
+    // Algoritmo de multiplicación de matrices
     for (int i = 0; i < fil1; ++i) {                     // Iterar sobre las filas de la primera matriz
         for (int j = 0; j < col2; ++j) {                 // Iterar sobre las columnas de la segunda matriz
             for (int k = 0; k < col1; ++k) {             // Iterar sobre las columnas de la primera matriz o filas de la segunda matriz
@@ -85,6 +89,19 @@ void imprimirMatriz(const vector<vector<double>>& mat) {
         }
         printf_s("\n");
     }
+}
+
+// Función para imprimir una matriz 4x4
+void imprimirMatriz4x4(float4x4 matriz) {
+    printf_s("[ %.4f, %.4f, %.4f, %.4f ]\n", matriz.m11, matriz.m12, matriz.m13, matriz.m14);
+    printf_s("[ %.4f, %.4f, %.4f, %.4f ]\n", matriz.m21, matriz.m22, matriz.m23, matriz.m24);
+    printf_s("[ %.4f, %.4f, %.4f, %.4f ]\n", matriz.m31, matriz.m32, matriz.m33, matriz.m34);
+    printf_s("[ %.4f, %.4f, %.4f, %.4f ]\n", matriz.m41, matriz.m42, matriz.m43, matriz.m44);
+}
+
+// Función para imprimir un vector (x, y, z)
+void imprimir3x3(float3 vector){
+    printf_s("(%f, %f, %f)\n\n", vector.x, vector.y, vector.z);
 }
 
 void Suma() {
@@ -128,6 +145,10 @@ void Suma() {
         vector<vector<double>> suma = sumarMatrices(matriz1, matriz2);
 
         // Mostrar la matriz resultante
+        printf_s("Primera Matriz:\n");
+        imprimirMatriz(matriz1);
+        printf_s("Segunda Matriz:\n");
+        imprimirMatriz(matriz2);
         printf_s("Matriz resultante:\n");
         imprimirMatriz(suma);
     }
@@ -179,6 +200,10 @@ void Resta() {
         vector<vector<double>> resta = restarMatrices(matriz1, matriz2);
 
         // Mostrar la matriz resultante
+        printf_s("Primera Matriz:\n");
+        imprimirMatriz(matriz1);
+        printf_s("Segunda Matriz:\n");
+        imprimirMatriz(matriz2);
         printf_s("Matriz resultante:\n");
         imprimirMatriz(resta);
     }
@@ -207,7 +232,7 @@ void Multi() {
     else {
         // Lectura fallida, mostrar mensaje de error
         printf_s("Error al leer los valores. Asegurese de ingresar dos enteros separados por coma.\n");
-        return Suma();
+        return Multi();
     }
 
     printf_s("Ingrese el tamaño de la matriz 2 (filas y columnas):\n");
@@ -223,7 +248,7 @@ void Multi() {
     else {
         // Lectura fallida, mostrar mensaje de error
         printf_s("Error al leer los valores. Asegurese de ingresar dos enteros separados por coma.\n");
-        return Suma();
+        return Multi();
     }
 
     if (col1 != fil2) {
@@ -257,10 +282,139 @@ void Multi() {
         vector<vector<double>> multi = multiplicarMatrices(matriz1, matriz2);
 
         // Mostrar la matriz resultante
+        printf_s("Primera Matriz:\n");
+        imprimirMatriz(matriz1);
+        printf_s("Segunda Matriz:\n");
+        imprimirMatriz(matriz2);
         printf_s("Matriz resultante:\n");
         imprimirMatriz(multi);
 
     }
+}
+
+void Quat() {
+    // Declarar variables para el punto, vector de rotación y ángulo
+   float3 p, VectorR;
+    float Angulo;
+
+    // Solicitar al usuario que ingrese el punto en el espacio tridimensional
+    printf_s("Ingrese las coordenadas del punto (x, y, z): ");
+    scanf_s("%f %f %f", &p.x, &p.y, &p.z);
+
+    // Solicitar al usuario que ingrese el vector de rotación
+    printf_s("Ingrese las componentes del vector de rotacion (x, y, z): ");
+    scanf_s("%f %f %f", &VectorR.x, &VectorR.y, &VectorR.z);
+
+    // Solicitar al usuario que ingrese el ángulo de rotación en grados
+    printf_s("Ingrese el angulo de rotacion en grados: ");
+    scanf_s("%f", &Angulo);
+
+    // Convertir el ángulo de grados a radianes
+    float Rad = XMConvertToRadians(Angulo);
+
+    // Crear el cuaternio de rotación
+    quaternion rot = make_quaternion_from_axis_angle(normalize(VectorR), Rad);
+
+    // Rotar el punto utilizando el cuaternio de rotación
+    float3 puntoR = transform(p, rot);
+
+    // Mostrar el resultado de la rotación
+    printf_s("Punto original: (%.4f, %.4f, %.4f)\n\n", p.x, p.y, p.z);
+    printf_s("Punto rotado: (%.4f, %.4f, %.4f)\n\n", puntoR.x, puntoR.y, puntoR.z);
+}
+
+void Rot3D() {
+    // Declarar variables para el punto, vector de rotación y ángulo
+    float3 p, Vector1, Vector2;
+    float Angulo;
+
+    // Solicitar al usuario que ingrese el ángulo de rotación en grados
+    printf_s("Ingrese el angulo de rotacion en grados: ");
+    scanf_s("%f", &Angulo);
+
+    // Convertir el ángulo de grados a radianes
+    float Rad = XMConvertToRadians(Angulo);
+
+    // Solicitar al usuario que ingrese el vector 1
+    printf_s("Ingrese las componentes del vector 1 (x, y, z): ");
+    scanf_s("%f %f %f", &Vector1.x, &Vector1.y, &Vector1.z);
+
+    // Solicitar al usuario que ingrese el vector 2
+    printf_s("Ingrese las componentes del vector 2 (x, y, z): ");
+    scanf_s("%f %f %f", &Vector2.x, &Vector2.y, &Vector2.z);
+
+    float3 VectorR = Vector2 - Vector1;
+    
+    // Construir la matriz de rotación alrededor del eje especificado
+    float4x4 MatR = make_float4x4_from_axis_angle(normalize(VectorR), Rad);
+   
+    // Transponer la matriz de rotación (Cambiar la fila 1 y la fila 3)
+    MatR = transpose(MatR);
+
+    printf_s("\n");
+
+    //Imprimir el vector resultante
+    printf_s("Vector Resultante:\n");
+    imprimir3x3(VectorR);
+
+    // Imprimir la matriz
+    printf_s("Matriz de rotacion:\n");
+    imprimirMatriz4x4(MatR);
+
+    // Crear la matriz de Translacion
+    float4x4  MatT1 = make_float4x4_translation(Vector1);
+    float4x4  MatT2 = make_float4x4_translation(-Vector1);
+
+    // Transponer la matriz de Translacion
+    MatT1 = transpose(MatT1);
+    MatT2 = transpose(MatT2);
+
+    // imprimir la matriz de translacion
+    printf_s("Matriz de traslacion:\n");
+    imprimirMatriz4x4(MatT1);
+    printf_s("Matriz de traslacion inversa:\n");
+    imprimirMatriz4x4(MatT2);
+
+    // Matriz final
+    MatR = MatT1 * MatR * MatT2;
+    printf_s("Matriz de rotacion final:\n");
+    imprimirMatriz4x4(MatR);
+
+    // Transponer de nuevo la Matriz para el transform
+    MatR = transpose(MatR);
+
+    printf_s("\n");
+
+    char respuesta;
+    do {
+        // Pedir al usuario las coordenadas del punto
+        float3 punto;
+
+        printf_s("Ingrese las coordenadas del punto (x, y, z): ");
+        scanf_s("%f %f %f", &punto.x, &punto.y, &punto.z);
+
+        // Rotar el punto utilizando la matriz de rotación
+        float3 P_Rot = transform(punto, MatR);
+
+        printf_s("\n");
+
+        // Mostrar el resultado de la rotación
+        printf_s("Punto original: (%.4f, %.4f, %.4f)\n", punto.x, punto.y, punto.z);
+        printf_s("Punto rotado: (%.4f, %.4f, %.4f)\n", P_Rot.x, P_Rot.y, P_Rot.z);
+
+        printf_s("\n");
+
+        printf_s("Desea rotar otro punto? (s/n): ");
+        scanf_s(" %c", &respuesta, 1);
+
+        // Verificar si la respuesta es diferente de 's' o 'n'
+        if (respuesta != 's' && respuesta != 'S' && respuesta != 'n' && respuesta != 'N') {
+            printf_s("Respuesta no valida. Se asume 'n' como respuesta.\n");
+            respuesta = 'n'; // Asignar 'n' como respuesta por defecto en caso de respuesta inválida
+        }
+    } while (respuesta == 's' || respuesta == 'S');
+
+    
 }
 
 int main (){
@@ -268,8 +422,15 @@ int main (){
     int opc;
 
     do {
-        printf_s("Calculadora de Matrices\n1.Suma\n2.Resta\n3.Multiplicacion\n4.Generar coordenadas por cuaternios\n");
-        printf_s("5.Obtener matriz compuesta\n6.Resolver matriz compuesta\n7.Obtener la perspectiva de los puntos originales y los transformados con las matrices compuestas\n");
+        printf_s("Calculadora de Matrices\n");
+        printf_s("1.Suma\n");
+        printf_s("2.Resta\n");
+        printf_s("3.Multiplicacion\n");
+        printf_s("4.Cuaternios (eje no paralelo)\n");
+        printf_s("5.Rotacion 3D (eje paralelo)\n");
+
+        printf_s("6.Matrices compuestas (z perspectiva)\n");
+        printf_s("7.Obtener la perspectiva de los puntos originales y los transformados con las matrices compuestas\n");
         printf_s("8.SALIR\n");
 
         scanf_s("%d", &opc);
@@ -291,9 +452,11 @@ int main (){
             break;
 
         case 4:
+            Quat();
             break;
 
         case 5:
+            Rot3D();
             break;
 
         case 6:
